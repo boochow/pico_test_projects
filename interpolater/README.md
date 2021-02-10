@@ -5,6 +5,9 @@ pimoroni Pico Display Pack is necessary to run this demo.
 
 # controls
 Button A: change X axis scale factor
+
 Button B: change Y axis scale factor
+
 Button X: change skew parameter
+
 Button Y: reset all parameters
