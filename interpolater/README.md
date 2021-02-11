@@ -1,3 +1,4 @@
+![Shape](https://raw.githubusercontent.com/boochow/pico_test_projects/images/interpolator/interpolator-demo.jpg)
 # texture mapping demo
 Texture mapping demo based on [this code](https://github.com/raspberrypi/pico-examples/tree/master/interp/hello_interp).
 
