@@ -11,5 +11,5 @@ Button Y: turn right
 
 Button X: go forward
 
-Button A: speed up
+Button A: jump
 
