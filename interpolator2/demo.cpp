@@ -5,24 +5,7 @@
 #include "pico/stdlib.h"
 #include "hardware/interp.h"
 #include "pico_display.hpp"
-
-uint8_t map[] ={3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-		3,3,5,5,5,5,5,5,5,5,5,5,5,5,3,3,
-		3,5,5,2,2,2,2,2,5,5,5,5,5,5,5,3,
-		3,5,5,2,2,2,2,2,5,5,5,5,5,5,5,3,
-		3,5,5,2,2,2,2,2,5,5,5,5,5,5,5,3,
-		3,5,5,2,2,2,2,2,2,2,5,5,5,5,5,3,
-		3,5,5,2,2,2,2,2,2,2,2,5,5,5,5,3,
-		3,5,5,5,4,4,4,4,4,4,4,4,5,5,5,3,
-		3,5,5,5,4,4,6,6,6,6,4,4,5,5,5,3,
-		3,5,5,5,4,4,6,6,6,6,4,4,5,5,5,3,
-		3,5,5,5,4,4,6,6,6,6,4,4,5,5,5,3,
-		3,5,5,5,4,4,4,3,3,4,4,4,5,5,5,3,
-		3,5,5,5,5,5,5,3,3,5,5,5,5,5,5,3,
-		3,5,5,5,5,5,5,5,5,5,5,5,5,5,5,3,
-		3,3,5,5,5,5,5,5,5,5,5,5,5,5,3,3,
-		3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
-  
+#include "map.h"
 uint8_t tiles[][256] = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -184,12 +167,6 @@ const uint16_t colors[] = {dark_grey, black, dark_green, lt_blue, lt_yellow, lt_
 
 const uint16_t bg_color = dark_grey;
 
-/*
-   the ground is on the X-Y plane
-   the viewer is standing at camera.pos (x,y)
-   the viewer's eye position is (x, y, z)
-   the screen the viewer is watching is placed at (x + screen_distance, y, z)
- */
 struct camera {
   int32_t x;
   int32_t y;
@@ -219,7 +196,7 @@ void map_fill_line(uint16_t *output, uint32_t u, uint32_t v, uint32_t du, uint32
 }
 
 void fill_buffer(int w, int h) {
-  interp_setup(map, 4, 4, 16, 4, 4);
+  interp_setup(map, map_width, map_height, 16, 4, 4);
 
   float rcos = cos(camera.rot / 180.0 * M_PI);
   float rsin = sin(camera.rot / 180.0 * M_PI);
@@ -243,6 +220,7 @@ void init_params() {
 
 int main() {
   float speed = 1.0;
+  int jump_count = 0;
   
   stdio_init_all();
   printf("\n\n");sleep_ms(1000);
@@ -256,6 +234,20 @@ int main() {
     fill_buffer(PicoDisplay::WIDTH, PicoDisplay::HEIGHT);
     pico_display.update();
 
+    int32_t step = (speed - 1) * 65536;
+    camera.x -= step * sin(M_PI * camera.rot / 180.0);
+    camera.y += step * cos(M_PI * camera.rot / 180.0);
+
+    if (jump_count > 0) {
+      if (jump_count < 50) {
+	camera.z += (1 + (jump_count++ / 5)) << 13;
+      } else if (jump_count < 99) {
+	camera.z -= (1 + ((jump_count++ - 49) / 5)) << 13;
+      } else {
+	jump_count = 0;
+      }
+    }
+    
     if (pico_display.is_pressed(pico_display.Y)) {
       camera.rot -= 5;
     }
@@ -269,6 +261,12 @@ int main() {
     }
 
     if (pico_display.is_pressed(pico_display.A)) {
+      if (jump_count == 0) {
+	jump_count = 1;
+      }
+    }
+  
+    if (pico_display.is_pressed(pico_display.X)) {
       speed = speed * 1.02;
     } else {
       speed = speed * 0.98;
@@ -276,14 +274,7 @@ int main() {
 	speed = 1.0;
       }
     }
-  
-    if (pico_display.is_pressed(pico_display.X)) {
-      int32_t step = speed * 65536;
-      camera.x -= step * sin(M_PI * camera.rot / 180.0);
-      camera.y += step * cos(M_PI * camera.rot / 180.0);
-    }
-    printf("%d %d %d\n", camera.x, camera.y, camera.rot);
-    sleep_ms(64);
+    sleep_ms(32);
   }
   return 0;
 }
