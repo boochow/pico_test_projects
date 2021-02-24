@@ -137,12 +137,10 @@ void interp_setup(const uint8_t *map, uint map_width_bits, uint map_height_bits,
     interp_config_set_add_raw(&cfg, true);
     interp_config_set_shift(&cfg, uv_fractional_bits - tile_width_bits);
     interp_config_set_mask(&cfg, 0, tile_width_bits - 1);
-    interp_config_set_shift(&cfg, 13);
-    interp_config_set_mask(&cfg, 0, 2);
     interp_set_config(interp1, 0, &cfg);
 
-    interp_config_set_shift(&cfg, 10);
-    interp_config_set_mask(&cfg, 3, 5);
+    interp_config_set_shift(&cfg, uv_fractional_bits - tile_height_bits - tile_width_bits);
+    interp_config_set_mask(&cfg, tile_width_bits, tile_height_bits + tile_width_bits - 1);
     interp_set_config(interp1, 1, &cfg);
 
     interp1->base[2] = 0;
