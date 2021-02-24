@@ -119,7 +119,7 @@ uint8_t tiles[][256] = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 			 6,1,4,6,6,6,1,6,1,1,4,1,6,1,1,1,
 			 1,1,4,6,6,6,1,1,6,1,1,6,1,6,1,1}};
 
-void interp_setup(uint8_t *map, uint map_width_bits, uint map_height_bits, uint uv_fractional_bits, uint tile_width_bits, uint tile_height_bits) {
+void interp_setup(const uint8_t *map, uint map_width_bits, uint map_height_bits, uint uv_fractional_bits, uint tile_width_bits, uint tile_height_bits) {
     interp_config cfg = interp_default_config();
 
     interp_config_set_add_raw(&cfg, true);
