@@ -202,9 +202,9 @@ void fill_buffer(int w, int h) {
     int32_t n = camera.z / q;
     int32_t s = camera.screen_distance * n;
     int32_t t2 = w * n;
-    int32_t x = camera.x  + (-t2 / 2) * rcos - s * rsin;
+    int32_t x = camera.x  + t2 / 2 * rcos + s * rsin;
     int32_t y = camera.y  + (-t2 / 2) * rsin + s * rcos;
-    int32_t du = rcos * n;
+    int32_t du = -rcos * n;
     int32_t dv = rsin * n;
     if (s > (200<<16)) {
       continue;
@@ -233,7 +233,7 @@ int main() {
     pico_display.update();
 
     int32_t step = (speed - 1) * 65536;
-    camera.x -= step * sin(M_PI * camera.rot / 180.0);
+    camera.x += step * sin(M_PI * camera.rot / 180.0);
     camera.y += step * cos(M_PI * camera.rot / 180.0);
 
     if (jump_count > 0) {
