@@ -213,18 +213,13 @@ void fill_buffer(int w, int h) {
   }
 }
 
-void init_params() {
-}
-
 int main() {
   float speed = 1.0;
   int jump_count = 0;
   
   stdio_init_all();
-  printf("\n\n");sleep_ms(1000);
   pico_display.init();
   pico_display.set_backlight(80);
-  init_params();
   
   while(true) {
     pico_display.set_pen(sky_blue);
