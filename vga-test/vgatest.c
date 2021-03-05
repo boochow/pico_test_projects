@@ -39,16 +39,15 @@ void disp_buf_draw_color_table(int offset) {
 
 // render big pixels
 int32_t single_black_line(uint32_t *buf, size_t buf_length) {
-    assert(buf_length >= 3);
+    assert(buf_length >= 2);
     
     buf[0] = COMPOSABLE_COLOR_RUN     | 0;
-    buf[1] = VGA_MODE.width - MIN_RUN | (COMPOSABLE_RAW_1P << 16);
-    buf[2] = 0                        | (COMPOSABLE_EOL_ALIGN << 16);
-    return 3;
+    buf[1] = VGA_MODE.width - MIN_RUN | (COMPOSABLE_EOL_ALIGN << 16);
+    return 2;
 }
 
 int32_t single_scanline(uint32_t *buf, size_t buf_length, uint8_t *data) {
-    assert(buf_length >= 3 * DISPBUF_W);
+    assert(buf_length >= 1 + 3 * DISPBUF_W);
 
     for(int i = 0; i < DISPBUF_W; i++) {
 	buf[0] = COMPOSABLE_COLOR_RUN  | (color[*data++] << 16);
@@ -56,8 +55,8 @@ int32_t single_scanline(uint32_t *buf, size_t buf_length, uint8_t *data) {
 	buf[2] = 0;                  //| -- the last word is ignored --
 	buf += 3;
     }
-    *(buf - 1) = 0                     | (COMPOSABLE_EOL_ALIGN << 16);
-    return 3 * DISPBUF_W;
+    buf[0] = COMPOSABLE_EOL_SKIP_ALIGN | 0;
+    return 3 * DISPBUF_W + 1;
 }
 
 void render_scanline(struct scanvideo_scanline_buffer *dest) {
