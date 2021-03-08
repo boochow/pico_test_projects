@@ -13,3 +13,7 @@ SNES mode7 style graphics demo for Pimoroni Display Pack. [pimoroni-pico](https:
 ## vga-test
 
 Simple VGA signal generator using scanvideo library. Tested on the Pimoroni VGA demo base.
+
+## vga-test2
+
+A test project for reading VGA demo board button state. Tested on the Pimoroni VGA demo base.
