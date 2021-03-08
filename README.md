@@ -9,3 +9,7 @@ A texture mapping demo for Pimoroni Display Pack. [pimoroni-pico](https://github
 ## interpolator2
 
 SNES mode7 style graphics demo for Pimoroni Display Pack. [pimoroni-pico](https://github.com/pimoroni/pimoroni-pico) library is necessary for building.
+
+## vga-test
+
+Simple VGA signal generator using scanvideo library. Tested on the Pimoroni VGA demo base.
