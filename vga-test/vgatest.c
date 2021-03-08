@@ -52,7 +52,7 @@ int32_t single_scanline(uint32_t *buf, size_t buf_length, uint8_t *data) {
     for(int i = 0; i < DISPBUF_W; i++) {
 	buf[0] = COMPOSABLE_COLOR_RUN  | (color[*data++] << 16);
 	buf[1] = PIXEL_W - 1 - MIN_RUN | (COMPOSABLE_RAW_1P_SKIP_ALIGN << 16);
-	buf[2] = 0;                  //| -- the last word is ignored --
+	buf[2] = 0;                  //| -- the last token is ignored --
 	buf += 3;
     }
     buf[0] = COMPOSABLE_EOL_SKIP_ALIGN | 0;
