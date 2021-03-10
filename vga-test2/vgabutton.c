@@ -5,6 +5,8 @@
 #include "pico/scanvideo/composable_scanline.h"
 #include "hardware/irq.h"
 
+// the code for reading button state is from pico-playground/apps/popcorn
+
 volatile uint32_t button_state = 0;
 static const uint button_pins[] = {0, 6, 11};
 
@@ -41,20 +43,20 @@ void vga_board_init_buttons() {
 #define MIN_RUN 3
 
 // rgb bar display 
-#define SCREEN_MARGIN 20
+#define SCREEN_MARGIN 18
 #define BAR_WIDTH 200
 #define BAR_HEIGHT 8
 #define BAR_H_BITS 4
 #define BAR_H_MASK 0xf
 #define RINGBUF_LEN 60
+#define RINGBUF_DOT 5
 
 uint8_t disp_buf[RINGBUF_LEN];
 uint8_t disp_buf_tail;
 
 void disp_buf_clear() {
     for(int i = 0; i < RINGBUF_LEN; i++) {
-	disp_buf[i] = 0;
-	disp_buf[i] = i & 7;
+	disp_buf[i] = (i % 5) ? 0 : 8;
     }
     disp_buf_tail = RINGBUF_LEN - 1;
 }
@@ -66,16 +68,19 @@ int32_t single_scanline(uint32_t *buf, size_t buf_length, uint8_t data) {
     int r = (data & 1) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0xff, 0 ,0) : 0;
     int g = (data & 2) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0, 0xff, 0) : 0;
     int b = (data & 4) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0, 0, 0xff) : 0;
+    int w = (data & 8) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0x40, 0x40, 0x40) : 0;
 
     buf[0] = COMPOSABLE_COLOR_RUN    | 0;
-    buf[1] = SCREEN_MARGIN - MIN_RUN | COMPOSABLE_COLOR_RUN << 16;
-    buf[2] = r                       | (BAR_WIDTH - MIN_RUN) << 16;
-    buf[3] = COMPOSABLE_COLOR_RUN    | g << 16;
-    buf[4] = BAR_WIDTH - MIN_RUN     | COMPOSABLE_COLOR_RUN << 16;
-    buf[5] = b                       | (BAR_WIDTH - MIN_RUN) << 16;
-    buf[6] = COMPOSABLE_COLOR_RUN    | 0;
-    buf[7] = SCREEN_MARGIN - MIN_RUN | COMPOSABLE_EOL_ALIGN << 16;
-    return 8;
+    buf[1] = SCREEN_MARGIN - MIN_RUN | COMPOSABLE_RAW_1P << 16;
+    buf[2] = w                       | COMPOSABLE_COLOR_RUN << 16;
+    buf[3] = r                       | (BAR_WIDTH - MIN_RUN) << 16;
+    buf[4] = COMPOSABLE_COLOR_RUN    | g << 16;
+    buf[5] = BAR_WIDTH - MIN_RUN     | COMPOSABLE_COLOR_RUN << 16;
+    buf[6] = b                       | (BAR_WIDTH - MIN_RUN) << 16;
+    buf[7] = COMPOSABLE_RAW_1P       | w << 16;
+    buf[8] = COMPOSABLE_COLOR_RUN    | 0;
+    buf[9] = SCREEN_MARGIN - MIN_RUN | COMPOSABLE_EOL_ALIGN << 16;
+    return 10;
 }
 
 void render_scanline(struct scanvideo_scanline_buffer *dest) {
@@ -92,8 +97,9 @@ void render_scanline(struct scanvideo_scanline_buffer *dest) {
 
 // update display buffer
 void frame_update_logic(int num) {
-    disp_buf[disp_buf_tail] = button_state;
-    disp_buf_tail = (disp_buf_tail + 1) % RINGBUF_LEN;
+    disp_buf_tail = ++disp_buf_tail % RINGBUF_LEN;
+    int prev_state = disp_buf[disp_buf_tail] & 0x08;
+    disp_buf[disp_buf_tail] = prev_state | button_state;
 }
 
 // main loop
