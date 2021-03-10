@@ -1,4 +1,4 @@
-![Shape](https://raw.githubusercontent.com/boochow/pico_test_projects/images/vga-test/vga_test.jpg)
+![Shape](https://raw.githubusercontent.com/boochow/pico_test_projects/main/vga-test3/fuji.png)
 # VGA raw pixel test
 
 This draws a 320x240 pixel image on the screen.
