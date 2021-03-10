@@ -8,10 +8,10 @@
 #define VGA_MODE vga_mode_320x240_60
 #define MIN_RUN 3
 
-// RAW_RUN |color 1| n-3 |..|color n| 0 | EOL
+// RAW_RUN |color 1| n+1-3 |..|color n| 0(black) | EOL
 int num_token = 2 + image_width + 1 + 1;
 
-// render big pixels
+// render pixels
 int32_t single_scanline(uint32_t *buf, size_t buf_length, const uint16_t *data) {
     assert(buf_length >= num_words);
 
