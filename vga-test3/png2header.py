@@ -11,8 +11,8 @@ if not os.path.exists(sys.argv[1]):
     sys.exit(1)
 
 im = Image.open(sys.argv[1])
-if not((im.size[0] <= 320) and (im.size[1] <= 240)):
-    sys.stderr.write("width and height of the image must be smaller than 320x240\n")
+if not((im.size[0] <= 640) and (im.size[1] <= 480)):
+    sys.stderr.write("width and height of the image must be smaller than 640x480\n")
     sys.exit(1)
 
 print("const int image_width  = ", end='')
@@ -24,7 +24,7 @@ print(im.size[1], end='')
 print(";\n")
 
 indexed = np.array(im)
-print('static uint16_t image[] = \n{')
+print('const uint16_t image[] = \n{')
 for l in indexed:
     print("\t", end='')
     for p in l:
