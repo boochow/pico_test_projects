@@ -2,9 +2,6 @@ import os, sys, math
 from PIL import Image
 import numpy as np
 
-def is_power_of_two(x):
-    return (x & (x - 1)) == 0
-
 if len(sys.argv) != 2:
     sys.stderr.write("png2header imagefile\n")
     sys.exit(1)
