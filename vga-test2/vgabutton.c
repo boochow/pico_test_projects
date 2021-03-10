@@ -42,33 +42,34 @@ void vga_board_init_buttons() {
 #define VGA_MODE vga_mode_640x480_60
 #define MIN_RUN 3
 
-// rgb bar display 
-#define SCREEN_MARGIN 18
+// rgb bar display
+// BAR_HEIGHT * RINGBUF_LEN = VGA_MODE.height
+// BAR_WIDTH * 3 + SCREEN_MARGIN * 2 + 2(for dots) = VGA_MODE.width
+#define SCREEN_MARGIN 19
 #define BAR_WIDTH 200
 #define BAR_HEIGHT 8
-#define BAR_H_BITS 4
-#define BAR_H_MASK 0xf
 #define RINGBUF_LEN 60
 #define RINGBUF_DOT 5
+#define DOT_MASK 8
 
 uint8_t disp_buf[RINGBUF_LEN];
 uint8_t disp_buf_tail;
 
 void disp_buf_clear() {
     for(int i = 0; i < RINGBUF_LEN; i++) {
-	disp_buf[i] = (i % 5) ? 0 : 8;
+	disp_buf[i] = (i % 5) ? 0 : DOT_MASK;
     }
     disp_buf_tail = RINGBUF_LEN - 1;
 }
 
 // render color bar
 int32_t single_scanline(uint32_t *buf, size_t buf_length, uint8_t data) {
-    assert(buf_length >= 8);
+    assert(buf_length >= 10);
 
     int r = (data & 1) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0xff, 0 ,0) : 0;
     int g = (data & 2) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0, 0xff, 0) : 0;
     int b = (data & 4) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0, 0, 0xff) : 0;
-    int w = (data & 8) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0x40, 0x40, 0x40) : 0;
+    int w = (data & DOT_MASK) ? PICO_SCANVIDEO_PIXEL_FROM_RGB8(0x40, 0x40, 0x40) : 0;
 
     buf[0] = COMPOSABLE_COLOR_RUN    | 0;
     buf[1] = SCREEN_MARGIN - MIN_RUN | COMPOSABLE_RAW_1P << 16;
@@ -98,7 +99,7 @@ void render_scanline(struct scanvideo_scanline_buffer *dest) {
 // update display buffer
 void frame_update_logic(int num) {
     disp_buf_tail = ++disp_buf_tail % RINGBUF_LEN;
-    int prev_state = disp_buf[disp_buf_tail] & 0x08;
+    int prev_state = disp_buf[disp_buf_tail] & DOT_MASK;
     disp_buf[disp_buf_tail] = prev_state | button_state;
 }
 
