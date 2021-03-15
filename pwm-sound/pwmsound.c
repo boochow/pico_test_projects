@@ -40,7 +40,7 @@ void psg_init() {
     }
 }
 
-void psg_freq(int i, uint freq) {
+void psg_freq(int i, float freq) {
     assert(i < NUM_PSG);
     psg[i].step = freq * OMEGA_UNIT; 
 }
@@ -129,8 +129,6 @@ int main() {
     psg_type(0, OSC_SQUARE);
     psg_type(1, OSC_SAW);
     psg_type(2, OSC_TRI);
-    psg_type(3, OSC_NOISE);
-    psg_vol(3, 0);
 
     float f0 = 100.f;
     float f1 = 100.f;
@@ -146,6 +144,7 @@ int main() {
     psg_vol(1, 0);
     psg_vol(2, 0);
 
+    psg_type(3, OSC_NOISE);
     for(int i = VOL_MAX; i >= 0; i = i * 3 / 4){
 	psg_vol(3, i);
 	sleep_ms(100);
