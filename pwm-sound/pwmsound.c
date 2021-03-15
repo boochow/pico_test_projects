@@ -9,7 +9,7 @@
 #define PWM_AUDIO_R    28
 #define RANDOMBIT      (*((uint *)(ROSC_BASE + ROSC_RANDOMBIT_OFFSET)) & 1)
 
-#define PWM_RANGE_BITS 8
+#define PWM_RANGE_BITS 10
 #define PWM_RANGE      (1<<PWM_RANGE_BITS)
 #define VOL_MAX        (PWM_RANGE / 4 - 1)
 #define SAMPLE_RATE    (125000000 / PWM_RANGE)
@@ -41,10 +41,12 @@ void psg_init() {
 }
 
 void psg_freq(int i, uint freq) {
+    assert(i < NUM_PSG);
     psg[i].step = freq * OMEGA_UNIT; 
 }
 
 void psg_vol(int i, int value) {
+    assert(i < NUM_PSG);
     if (value < 0) {
 	value = 0;
     }
@@ -52,10 +54,12 @@ void psg_vol(int i, int value) {
 }
 
 void psg_type(int i, enum psg_type type) {
+    assert(i < NUM_PSG);
     psg[i].type = type;
 }
 
 static inline uint psg_value(int i) {
+    assert(i < NUM_PSG);
     uint result;
     if (psg[i].type == OSC_SQUARE) {
 	result = (psg[i].phase > FIXED_0_5) ? psg[i].sound_vol : 0;
@@ -125,6 +129,8 @@ int main() {
     psg_type(0, OSC_SQUARE);
     psg_type(1, OSC_SAW);
     psg_type(2, OSC_TRI);
+    psg_type(3, OSC_NOISE);
+    psg_vol(3, 0);
 
     float f0 = 100.f;
     float f1 = 100.f;
@@ -136,15 +142,13 @@ int main() {
     	f1 = f1 * 1.005;
     	sleep_ms(10);
     }
+    psg_vol(0, 0);
+    psg_vol(1, 0);
+    psg_vol(2, 0);
 
-    psg_type(0, OSC_NOISE);
-    psg_type(1, OSC_NOISE);
-    psg_type(2, OSC_NOISE);
-    for(int i = VOL_MAX; i >= 0; i--){
-	psg_vol(0, i);
-	psg_vol(1, i);
-	psg_vol(2, i);
-	sleep_ms(30);
+    for(int i = VOL_MAX; i >= 0; i = i * 3 / 4){
+	psg_vol(3, i);
+	sleep_ms(100);
     }
 
     while (1)
