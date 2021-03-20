@@ -8,8 +8,10 @@
 #define VGA_MODE vga_mode_640x480_60
 #define MIN_RUN 3
 
-// moving box
+// background animation
 static int graylevel = 0;
+
+// moving box
 static int box_x = 4;
 static int delta_x = 5;
 static int box_y = 0;
@@ -33,7 +35,6 @@ void box_step() {
     }
 }
 
-// renderer for 1st plane
 int32_t single_color_line(uint32_t *buf, size_t buf_length, uint16_t color) {
     assert(buf_length >= 3);
     
@@ -43,7 +44,6 @@ int32_t single_color_line(uint32_t *buf, size_t buf_length, uint16_t color) {
     return 3;
 }
 
-// renderer for 2nd plane
 int32_t box(uint32_t *buf, size_t buf_length, uint16_t line_num, uint16_t color) {
     assert(buf_length >= 5);
 
