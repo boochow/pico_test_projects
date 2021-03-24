@@ -5,19 +5,19 @@
 #include "hardware/pwm.h"
 #include "hardware/regs/rosc.h"
 
-#define PWM_AUDIO_L    27
-#define PWM_AUDIO_R    28
+#define PWM_AUDIO_L    (27)
+#define PWM_AUDIO_R    (28)
 #define RANDOMBIT      (*((uint *)(ROSC_BASE + ROSC_RANDOMBIT_OFFSET)) & 1)
 
-#define PWM_RANGE_BITS 10
+#define PWM_RANGE_BITS (10)
 #define PWM_RANGE      (1<<PWM_RANGE_BITS)
-#define VOL_MAX        (PWM_RANGE / 4 - 1)
+#define NUM_PSG        (4)
+#define VOL_MAX        (PWM_RANGE / NUM_PSG - 1)
 #define SAMPLE_RATE    (125000000 / PWM_RANGE)
 #define OMEGA_UNIT     (FIXED_1_0 / SAMPLE_RATE)
-#define NUM_PSG        4
 
-#define FIXED_0_5      0x40000000
-#define FIXED_1_0      0x7fffffff
+#define FIXED_0_5      (0x40000000)
+#define FIXED_1_0      (0x7fffffff)
 typedef uint32_t fixed; // 1.0=0x7fffffff, 0.0=0x0
 
 enum psg_type {OSC_SQUARE, OSC_SAW, OSC_TRI, OSC_NOISE};
@@ -30,15 +30,6 @@ struct psg_t {
 };
 
 static struct psg_t psg[NUM_PSG];
-
-void psg_init() {
-    for(int i = 0; i < NUM_PSG; i++) {
-	psg[i].phase = 0;
-	psg[i].step = 0;
-	psg[i].sound_vol = VOL_MAX / 4;
-	psg[i].type = OSC_SQUARE;
-    }
-}
 
 void psg_freq(int i, float freq) {
     assert(i < NUM_PSG);
@@ -121,9 +112,18 @@ void psg_pwm_config() {
 #endif
 }
 
+void psg_init() {
+    for(int i = 0; i < NUM_PSG; i++) {
+	psg[i].phase = 0;
+	psg[i].step = 0;
+	psg[i].sound_vol = VOL_MAX / 4;
+	psg[i].type = OSC_SQUARE;
+    }
+    psg_pwm_config();
+}
+
 int main() {
     stdio_init_all();
-    psg_pwm_config();
     psg_init();
 
     psg_type(0, OSC_SQUARE);
