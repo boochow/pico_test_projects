@@ -1,6 +1,9 @@
-import os, sys, math
+import os
+import sys
+import math
 from PIL import Image
 import numpy as np
+
 
 def is_power_of_two(x):
     return (x & (x - 1)) == 0
@@ -31,7 +34,6 @@ print('constexpr uint8_t map[] = \n{')
 for l in indexed:
     print("\t", end='')
     for p in l:
-        print(p,', ', sep='', end='')
+        print(p, ', ', sep='', end='')
     print()
 print('};')
-
