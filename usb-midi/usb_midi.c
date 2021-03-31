@@ -30,6 +30,7 @@ void midi_task(void)
 
     while(n_data = tud_midi_n_available(0, 0)) {
 	if (tud_midi_n_read(0, 0, msg, 4)) {
+	    printf("%02x%02x%02x%02x | ", msg[0], msg[1], msg[2], msg[3]);
 	    printf("Ch:%02d | ", msg[0] & 0xf);
 	    switch ((msg[0] >> 4) & 0xf) {
 	    case 0:
@@ -45,10 +46,16 @@ void midi_task(void)
 		printf("SYS: %02x %02x %02x", msg[1], msg[2], msg[3]);
 		break;
 	    case 4:
+		if (msg[1] == 0xf0) {
+		    printf("SYSEX start");
+		} else {
+		    printf("...");
+		}
+		break;
 	    case 5:
 	    case 6:
 	    case 7:
-		printf("SYSEX");
+		printf("SYSEX end");
 		break;
 	    case 8:
 		printf("NOTE OFF: key=%02x velocity=%d", msg[1], msg[2]);
