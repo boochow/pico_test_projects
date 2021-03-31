@@ -25,12 +25,26 @@ int main() {
 
 void midi_task(void)
 {
+    static bool single = false;
     uint8_t msg[4];
     int n_data;
 
     while(n_data = tud_midi_n_available(0, 0)) {
+	msg[0] = 0; msg[1] = 0; msg[2] = 0; msg[3] = 0;
 	if (tud_midi_n_read(0, 0, msg, 4)) {
 	    printf("%02x%02x%02x%02x | ", msg[0], msg[1], msg[2], msg[3]);
+	    if (single) {
+		printf("      |           : ");
+		for (int i = 0; i < 3; i++) {
+		    printf("%02x ", msg[i]);
+		    if (msg[i] == 0xf7) {
+			single = false;
+			break;
+		    }
+		}
+		printf("\n");
+		continue;
+	    }
 	    printf("Ch:%02d | ", msg[0] & 0xf);
 	    switch ((msg[0] >> 4) & 0xf) {
 	    case 0:
@@ -58,28 +72,29 @@ void midi_task(void)
 		printf("SYSEX end");
 		break;
 	    case 8:
-		printf("NOTE OFF: key=%02x velocity=%d", msg[1], msg[2]);
+		printf("NOTE OFF  : key=%d velocity=%d", msg[1], msg[2]);
 		break;
 	    case 9:
-		printf("NOTE ON:  key=%02x velocity=%d", msg[1], msg[2]);
+		printf("NOTE ON   : key=%d velocity=%d", msg[1], msg[2]);
 		break;
 	    case 10:
-		printf("Poly key pressure");
+		printf("PolyPress :");
 		break;
 	    case 11:
-		printf("Control:  %02x %02x", msg[1], msg[2]);
+		printf("Control   : %02x %02x", msg[1], msg[2]);
 		break;
 	    case 12:
-		printf("Prog chg: %02x", msg[1]);
+		printf("Program   : %02x", msg[1]);
 		break;
 	    case 13:
-		printf("Channel Pressure");
+		printf("ChPress   : %02x", msg[1]);
 		break;
 	    case 14:
-		printf("Pitch bend: %02x %02x", msg[1], msg[2]);
+		printf("PitchBend : %d", msg[1] + 128 * msg[2] - 8192);
 		break;
 	    case 15:
-		printf("Single byte: %02x", msg[0]);
+		printf("Singlebyte: %02x %02x %02x", msg[0], msg[1], msg[2]);
+		single = true;
 		break;
 	    default:
 		break;
