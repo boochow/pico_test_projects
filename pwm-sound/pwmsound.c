@@ -122,34 +122,79 @@ void psg_init() {
     psg_pwm_config();
 }
 
+void psg_all_vol(int value) {
+    for(int i = 0 ; i < NUM_PSG; i++) {
+	psg_vol(i, value);
+    }
+}
+
+void demo1() {
+    psg_type(0, OSC_SQUARE);
+    psg_type(1, OSC_SAW);
+    psg_type(2, OSC_TRI);
+    psg_type(3, OSC_NOISE);
+    psg_all_vol(0);
+    
+    for(int j = 0; j < 3; j++) {
+	psg_vol(j, VOL_MAX / 4);
+	float f0 = 100.f;
+	for(int i = 0; i < 400; i++) {
+	    psg_freq(j, f0);
+	    f0 = f0 * 1.007;
+	    sleep_ms(3);
+	}
+	psg_vol(j, 0);
+    }
+
+    for(int i = 10; i >= 0; i--){
+	psg_vol(3, VOL_MAX / 100 * i * i);
+	sleep_ms(100);
+    }
+}
+
+void demo2() {
+    const int pat[4][17] = {
+			    {1,0,0,0, 1,0,1,0, 1,0,0,0, 1,0,1,1, 0},
+			    {1,1,0,0, 0,0,1,1, 1,1,0,0, 1,0,1,0, 0},
+			    {0,0,1,0, 1,1,0,1, 0,0,1,1, 1,1,0,0, 0},
+			    {1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,0,0, 0}};
+
+    psg_type(0, OSC_NOISE);
+    psg_type(1, OSC_SQUARE);
+    psg_type(2, OSC_SAW);
+    psg_type(3, OSC_TRI);
+    psg_freq(1, 110.f);
+    psg_freq(2, 440.f);
+    psg_freq(3, 880.f);
+    psg_all_vol(VOL_MAX/4);
+
+    for(int repeat = 0; repeat < 4; repeat++) {
+	for(int i = 0; i < 16; i++) {
+	    for(int t = 1; t < 5; t++) {
+		for (int j = 0; j < 4; j++) {
+		    if (pat[j][i + 1]) {
+			psg_vol(j, pat[j][i] * (VOL_MAX / 4));
+		    } else {
+			psg_vol(j, pat[j][i] * (VOL_MAX / 4) / t);
+		    }
+		}
+		sleep_ms(30);
+	    }
+	}
+    }
+    psg_all_vol(0);
+}
+
 int main() {
     stdio_init_all();
     psg_init();
 
-    psg_type(0, OSC_SQUARE);
-    psg_type(1, OSC_SAW);
-    psg_type(2, OSC_TRI);
-
-    float f0 = 100.f;
-    float f1 = 100.f;
-    for(int i = 0; i < 400; i++) {
-	psg_freq(0, f0);
-	psg_freq(1, f1 * 2 / 3);
-	psg_freq(2, f0 + f1 * 3 / 4);
-    	f0 = f0 * 1.007;
-    	f1 = f1 * 1.005;
-    	sleep_ms(10);
-    }
-    psg_vol(0, 0);
-    psg_vol(1, 0);
-    psg_vol(2, 0);
-
-    psg_type(3, OSC_NOISE);
-    for(int i = VOL_MAX; i >= 0; i = i * 3 / 4){
-	psg_vol(3, i);
-	sleep_ms(100);
-    }
-
+    sleep_ms(1000);
+    demo1();
+    sleep_ms(500);
+    demo2();
+    sleep_ms(500);
+    
     while (1)
         tight_loop_contents();
 }
