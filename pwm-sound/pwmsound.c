@@ -18,14 +18,14 @@
 
 #define FIXED_0_5      (0x40000000)
 #define FIXED_1_0      (0x7fffffff)
-typedef uint32_t fixed; // 1.0=0x7fffffff, 0.0=0x0
+typedef uint32_t fixed;       // 1.0=0x7fffffff, 0.0=0x0
 
 enum psg_type {OSC_SQUARE, OSC_SAW, OSC_TRI, OSC_NOISE};
 		 
 struct psg_t {
     volatile fixed phi;       // 0..FIXED_1_0
-    fixed step;                 // 0..FIXED_1_0
-    volatile int sound_vol;     // 0..PSG_VOL_MAX
+    fixed step;               // 0..FIXED_1_0
+    volatile int sound_vol;   // 0..PSG_VOL_MAX
     enum psg_type type;
 };
 
