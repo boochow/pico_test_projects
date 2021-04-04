@@ -23,7 +23,7 @@ typedef uint32_t fixed; // 1.0=0x7fffffff, 0.0=0x0
 enum psg_type {OSC_SQUARE, OSC_SAW, OSC_TRI, OSC_NOISE};
 		 
 struct psg_t {
-    volatile fixed phase;       // 0..FIXED_1_0
+    volatile fixed phi;       // 0..FIXED_1_0
     fixed step;                 // 0..FIXED_1_0
     volatile int sound_vol;     // 0..VOL_MAX
     enum psg_type type;
@@ -53,11 +53,11 @@ static inline uint psg_value(int i) {
     assert(i < NUM_PSG);
     uint result;
     if (psg[i].type == OSC_SQUARE) {
-	result = (psg[i].phase > FIXED_0_5) ? psg[i].sound_vol : 0;
+	result = (psg[i].phi > FIXED_0_5) ? psg[i].sound_vol : 0;
     } else if (psg[i].type == OSC_SAW) {
-	result = ((psg[i].phase >> (31 - PWM_RANGE_BITS)) * psg[i].sound_vol) >> PWM_RANGE_BITS;
+	result = ((psg[i].phi >> (31 - PWM_RANGE_BITS)) * psg[i].sound_vol) >> PWM_RANGE_BITS;
     } else if (psg[i].type == OSC_TRI) {
-	result = ((psg[i].phase >> (30 - PWM_RANGE_BITS)) * psg[i].sound_vol) >> PWM_RANGE_BITS;
+	result = ((psg[i].phi >> (30 - PWM_RANGE_BITS)) * psg[i].sound_vol) >> PWM_RANGE_BITS;
 	result = (result < psg[i].sound_vol) ? result : psg[i].sound_vol * 2 - result;
     } else { // OSC_NOISE
 	result = RANDOMBIT * psg[i].sound_vol;
@@ -67,9 +67,9 @@ static inline uint psg_value(int i) {
 
 static inline void psg_next() {
     for(int i = 0; i < NUM_PSG; i++) {
-	psg[i].phase += psg[i].step;
-	if (psg[i].phase > FIXED_1_0) {
-	    psg[i].phase -= FIXED_1_0;
+	psg[i].phi += psg[i].step;
+	if (psg[i].phi > FIXED_1_0) {
+	    psg[i].phi -= FIXED_1_0;
 	}
     }
 }
@@ -114,7 +114,7 @@ void psg_pwm_config() {
 
 void psg_init() {
     for(int i = 0; i < NUM_PSG; i++) {
-	psg[i].phase = 0;
+	psg[i].phi = 0;
 	psg[i].step = 0;
 	psg[i].sound_vol = VOL_MAX / 4;
 	psg[i].type = OSC_SQUARE;
