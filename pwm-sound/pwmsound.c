@@ -12,7 +12,7 @@
 #define PWM_RANGE_BITS (10)
 #define PWM_RANGE      (1<<PWM_RANGE_BITS)
 #define NUM_PSG        (4)
-#define VOL_MAX        (PWM_RANGE / NUM_PSG - 1)
+#define PSG_VOL_MAX    (PWM_RANGE / NUM_PSG - 1)
 #define SAMPLE_RATE    (125000000 / PWM_RANGE)
 #define OMEGA_UNIT     (FIXED_1_0 / SAMPLE_RATE)
 
@@ -25,7 +25,7 @@ enum psg_type {OSC_SQUARE, OSC_SAW, OSC_TRI, OSC_NOISE};
 struct psg_t {
     volatile fixed phi;       // 0..FIXED_1_0
     fixed step;                 // 0..FIXED_1_0
-    volatile int sound_vol;     // 0..VOL_MAX
+    volatile int sound_vol;     // 0..PSG_VOL_MAX
     enum psg_type type;
 };
 
@@ -41,7 +41,7 @@ void psg_vol(int i, int value) {
     if (value < 0) {
 	value = 0;
     }
-    psg[i].sound_vol = value % (VOL_MAX + 1);
+    psg[i].sound_vol = value % (PSG_VOL_MAX + 1);
 }
 
 void psg_type(int i, enum psg_type type) {
@@ -116,7 +116,7 @@ void psg_init() {
     for(int i = 0; i < NUM_PSG; i++) {
 	psg[i].phi = 0;
 	psg[i].step = 0;
-	psg[i].sound_vol = VOL_MAX / 4;
+	psg[i].sound_vol = PSG_VOL_MAX / 4;
 	psg[i].type = OSC_SQUARE;
     }
     psg_pwm_config();
@@ -136,7 +136,7 @@ void demo1() {
     psg_all_vol(0);
     
     for(int j = 0; j < 3; j++) {
-	psg_vol(j, VOL_MAX / 4);
+	psg_vol(j, PSG_VOL_MAX / 4);
 	float f0 = 100.f;
 	for(int i = 0; i < 400; i++) {
 	    psg_freq(j, f0);
@@ -147,7 +147,7 @@ void demo1() {
     }
 
     for(int i = 10; i >= 0; i--){
-	psg_vol(3, VOL_MAX / 100 * i * i);
+	psg_vol(3, PSG_VOL_MAX / 100 * i * i);
 	sleep_ms(100);
     }
 }
@@ -166,16 +166,16 @@ void demo2() {
     psg_freq(1, 110.f);
     psg_freq(2, 440.f);
     psg_freq(3, 880.f);
-    psg_all_vol(VOL_MAX/4);
+    psg_all_vol(PSG_VOL_MAX/4);
 
     for(int repeat = 0; repeat < 4; repeat++) {
 	for(int i = 0; i < 16; i++) {
 	    for(int t = 1; t < 5; t++) {
 		for (int j = 0; j < 4; j++) {
 		    if (pat[j][i + 1]) {
-			psg_vol(j, pat[j][i] * (VOL_MAX / 4));
+			psg_vol(j, pat[j][i] * (PSG_VOL_MAX / 4));
 		    } else {
-			psg_vol(j, pat[j][i] * (VOL_MAX / 4) / t);
+			psg_vol(j, pat[j][i] * (PSG_VOL_MAX / 4) / t);
 		    }
 		}
 		sleep_ms(30);
