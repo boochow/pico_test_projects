@@ -1,6 +1,6 @@
 # VGA Multiple plane test
 
-A box drawn on the front plane is moving around lines drawn on the background plane.
+A box drawn on the front plane is moving over the lines drawn on the background plane.
 
 To build:
 ```
