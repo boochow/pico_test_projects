@@ -19,6 +19,7 @@ add_compile_definitions(framebuf PRIVATE
   )
 
 target_link_libraries(framebuf PRIVATE
+  pico_multicore
   pico_stdlib
   pico_scanvideo_dpi)
 

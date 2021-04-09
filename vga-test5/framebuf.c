@@ -1,7 +1,8 @@
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "pico.h"
 #include "pico/scanvideo.h"
@@ -11,6 +12,8 @@
 #define MIN_RUN 3
 #define BUF_ROW_WORDS 20
 #define BUF_LINES 480
+
+static semaphore_t video_initted;
 
 // black and white bitmap 32bit x 20 x 480
 uint32_t framebuffer[BUF_ROW_WORDS * BUF_LINES];
@@ -76,9 +79,43 @@ int32_t inline __time_critical_func(single_scanline)(uint32_t *buf, size_t buf_l
     return (VGA_MODE.width / 2) + 2;
 }
 
-// update the scene
-void frame_update_logic(int num) {
-    static int count = 0;
+static void inline render_scanline(struct scanvideo_scanline_buffer *dest) {
+    uint32_t *buf = dest->data;
+    size_t buf_length = dest->data_max;
+    int line_num = scanvideo_scanline_number(dest->scanline_id);
+
+    dest->data_used = single_scanline(buf, buf_length, &framebuffer[BUF_ROW_WORDS * line_num]);
+
+    dest->status = SCANLINE_OK;
+}
+
+void render_loop() {
+    static uint32_t last_frame_num = 0;
+
+    while (true) {
+        struct scanvideo_scanline_buffer *scanline_buffer = scanvideo_begin_scanline_generation(true);
+        uint32_t frame_num = scanvideo_frame_number(scanline_buffer->scanline_id);
+        if (frame_num != last_frame_num) {
+            last_frame_num = frame_num;
+        }
+
+        render_scanline(scanline_buffer);
+	
+        scanvideo_end_scanline_generation(scanline_buffer);
+    }
+}
+
+// main loop (scanvideo)
+void core1_main() {
+    scanvideo_setup(&VGA_MODE);
+    scanvideo_timing_enable(true);
+    sem_release(&video_initted);
+    set_color_table(PICO_SCANVIDEO_PIXEL_FROM_RGB8(0xff,0xff,0xff), 0);
+    render_loop();
+}
+
+// main loop (graphics)
+void draw_random_line() {
     int x0 = rand() % 1280;
     int y0 = 0;
     int x1 = 0;
@@ -92,54 +129,35 @@ void frame_update_logic(int num) {
 	x1 = 640;
     }
     line(x0, y0, x1, y1);
-
-    if (count++ > 600) {
-	clear_screen();
-	count = 0;
-    }
 }
 
-static void inline render_scanline(struct scanvideo_scanline_buffer *dest) {
-    uint32_t *buf = dest->data;
-    size_t buf_length = dest->data_max;
-    int line_num = scanvideo_scanline_number(dest->scanline_id);
-
-    dest->data_used = single_scanline(buf, buf_length, &framebuffer[BUF_ROW_WORDS * line_num]);
-
-    dest->status = SCANLINE_OK;
-}
-
-// main loop
-void render_loop() {
-    static uint32_t last_frame_num = 0;
-
-    while (true) {
-        struct scanvideo_scanline_buffer *scanline_buffer = scanvideo_begin_scanline_generation(true);
-        uint32_t frame_num = scanvideo_frame_number(scanline_buffer->scanline_id);
-        if (frame_num != last_frame_num) {
-            last_frame_num = frame_num;
-	    frame_update_logic(frame_num);
-	    /*
-	    for(int i = 0; i < 40; i++){
-		int s = (i * 12 + frame_num % 12) * BUF_ROW_WORDS;
-		for(int j = 0; j < BUF_ROW_WORDS; j++) {
-		    framebuffer[s + j] = rand() + rand();
-		}
-	    }
-	    */
+void core0_main() {
+    int mode = 0;
+    
+    while(true) {
+        int c = getchar_timeout_us(0);
+        switch (c) {
+            case ' ':
+                mode = 1 - mode;
+                clear_screen();
+                break;
         }
-
-        render_scanline(scanline_buffer);
-	
-        scanvideo_end_scanline_generation(scanline_buffer);
+	if (mode) {
+	    scanvideo_wait_for_vblank();
+	    draw_random_line();
+	} else {
+	    for(int i = 0; i < BUF_ROW_WORDS * BUF_LINES; i++){
+		framebuffer[i] = rand() + rand();
+	    }
+	}
     }
 }
 
 int main(void) {
     stdio_init_all();
-    scanvideo_setup(&VGA_MODE);
-    scanvideo_timing_enable(true);
-    set_color_table(PICO_SCANVIDEO_PIXEL_FROM_RGB8(0xff,0xff,0xff), 0);
-    render_loop();
+    sem_init(&video_initted, 0, 1);
+    multicore_launch_core1(core1_main);
+    sem_acquire_blocking(&video_initted);
+    core0_main();
     return 0;
 }
