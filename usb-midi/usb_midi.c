@@ -4,25 +4,6 @@
 #include "bsp/board.h"
 #include "tusb.h"
 
-void midi_task(void);
-
-int main() {
-    stdio_init_all();
-    board_init();
-    tusb_init();
-
-    sleep_ms(500);
-    printf("*** MIDI MONITOR ***\n");
-
-    while (1)
-	{
-	    tud_task(); // tinyusb device task
-	    midi_task();
-	}
-
-    return 0;
-}
-
 bool print_midi_event(const uint8_t msg[4]) {
     bool single = false;
     int ch;
@@ -139,4 +120,20 @@ void midi_task(void)
 	    }
 	}
     }
+}
+
+int main() {
+    stdio_init_all();
+    board_init();
+    tusb_init();
+
+    sleep_ms(500);
+    printf("*** MIDI MONITOR ***\n");
+
+    while (true) {
+	tud_task();
+	midi_task();
+    }
+
+    return 0;
 }
