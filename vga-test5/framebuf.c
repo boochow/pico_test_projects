@@ -115,17 +115,17 @@ void core1_main() {
 
 // main loop (graphics)
 void draw_random_line() {
-    int x0 = rand() % 1280;
+    int x0 = rand() % (VGA_MODE.width * 2);
     int y0 = 0;
     int x1 = 0;
-    int y1 = rand() % 960;
-    if (x0 >= 640) {
-	x0 -= 640;
-	y0 = 480;
+    int y1 = rand() % (VGA_MODE.height * 2);
+    if (x0 >= VGA_MODE.width) {
+	x0 -= VGA_MODE.width;
+	y0 = VGA_MODE.height;
     }
-    if (y1 >= 480) {
-	y1 -= 480;
-	x1 = 640;
+    if (y1 >= VGA_MODE.height) {
+	y1 -= VGA_MODE.height;
+	x1 = VGA_MODE.width;
     }
     line(x0, y0, x1, y1);
 }
