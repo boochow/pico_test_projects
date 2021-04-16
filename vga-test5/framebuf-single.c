@@ -86,11 +86,6 @@ static void inline render_scanline(struct scanvideo_scanline_buffer *dest) {
     dest->status = SCANLINE_OK;
 }
 
-// main loop (scanvideo)
-void core1_main() {
-}
-
-// main loop (graphics)
 void draw_random_line() {
     int x0 = rand() % (VGA_MODE.width * 2);
     int y0 = 0;
@@ -105,12 +100,6 @@ void draw_random_line() {
 	x1 = VGA_MODE.width;
     }
     line(x0, y0, x1, y1);
-}
-
-void core0_main() {
-    
-    while(true) {
-    }
 }
 
 void frame_update_logic(int num) {
@@ -144,28 +133,12 @@ int64_t timer_callback(alarm_id_t alarm_id, void *user_data) {
     return TIMER_PERIOD;
 }
 
-void render_loop2() {
-    static uint32_t last_frame_num = 0;
-
-    while (true) {
-        struct scanvideo_scanline_buffer *scanline_buffer = scanvideo_begin_scanline_generation(true);
-        uint32_t frame_num = scanvideo_frame_number(scanline_buffer->scanline_id);
-        if (frame_num != last_frame_num) {
-            last_frame_num = frame_num;
-	    frame_update_logic(frame_num);
-        }
-
-        render_scanline(scanline_buffer);
-	
-        scanvideo_end_scanline_generation(scanline_buffer);
-    }
-}
-
 void render_loop() {
     while(true) {
 	frame_update_logic(0);
     }
 }
+
 int main(void) {
     stdio_init_all();
     scanvideo_setup(&VGA_MODE);
