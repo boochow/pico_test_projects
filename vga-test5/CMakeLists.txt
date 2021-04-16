@@ -14,6 +14,10 @@ add_executable(framebuf
   framebuf.c
   )
 
+add_executable(framebuf-single
+  framebuf-single.c
+  )
+
 add_compile_definitions(framebuf PRIVATE
   PICO_SCANVIDEO_MAX_SCANLINE_BUFFER_WORDS=350
   )
@@ -23,7 +27,14 @@ target_link_libraries(framebuf PRIVATE
   pico_stdlib
   pico_scanvideo_dpi)
 
+target_link_libraries(framebuf-single PRIVATE
+  pico_stdlib
+  pico_scanvideo_dpi)
+
 pico_enable_stdio_usb(framebuf 1)
+pico_enable_stdio_uart(framebuf 0)
+pico_enable_stdio_usb(framebuf-single 1)
 pico_enable_stdio_uart(framebuf 0)
 
 pico_add_extra_outputs(framebuf)
+pico_add_extra_outputs(framebuf-single)
