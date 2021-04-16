@@ -1,6 +1,6 @@
 # VGA black and white frame buffer
 
-A simple bitmap screen.
+A simple bitmap screen. Hit space bar to switch between the noise-drawing demo and the line-drawing demo.
 
 To build:
 ```
