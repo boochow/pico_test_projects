@@ -1,3 +1,4 @@
+![Shape](https://raw.githubusercontent.com/boochow/pico_test_projects/images/vga-test2/vga-button.jpg)
 # VGA board button input test
 
 Read button state of the VGA demo base board.
