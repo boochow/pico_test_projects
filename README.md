@@ -8,6 +8,10 @@ My Raspberry Pi Pico test projects.
 
 **`interpolator2-vga`** interpolator2 demo using scanvideo library.
 
+**`pwm-sound`** A simple sound generator. Three waveforms + noise.
+
+**`usb-midi`** A USB MIDI monitor device.
+
 **`vga-test`** Simple VGA signal generator using scanvideo library. 
 
 **`vga-test2`** A test project for reading VGA demo board button state. 
@@ -15,3 +19,5 @@ My Raspberry Pi Pico test projects.
 **`vga-test3`** Rendering image data from the RAM (QVGA size) and from the flash (VGA size). 
 
 **`vga-test4`** A test project for using multiplane function of scanvideo library.
+
+**`vga-test5`** A 640x480 black-and-white frame buffer demo.
