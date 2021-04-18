@@ -6,11 +6,13 @@ My Raspberry Pi Pico test projects.
 
 **`interpolator2`** SNES mode7 style graphics demo for Pimoroni Display Pack. [pimoroni-pico](https://github.com/pimoroni/pimoroni-pico) library is necessary for building.
 
-**`interpolator2-vga`** interpolator2 demo using scanvideo library.
-
 **`pwm-sound`** A simple sound generator. Three waveforms + noise.
 
 **`usb-midi`** A USB MIDI monitor device.
+
+To build following projects, you need to install the [pico-extras](https://github.com/raspberrypi/pico-extras) library.
+
+**`interpolator2-vga`** interpolator2 demo using scanvideo library.
 
 **`vga-test`** Simple VGA signal generator using scanvideo library. 
 
