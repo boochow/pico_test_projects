@@ -23,3 +23,5 @@ To build following projects, you need to install the [pico-extras](https://githu
 **`vga-test4`** A test project for using multiplane function of scanvideo library.
 
 **`vga-test5`** A 640x480 black-and-white frame buffer demo.
+
+**`vga-test6`** Minimaistic scanvideo library demo.
